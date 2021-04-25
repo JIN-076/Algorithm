@@ -2,12 +2,13 @@
 #include <queue>
 using namespace std;
 
-#define MAX 101
-#define T_MAX 10000
+#define MAX 100
 
-// 동, 북, 서, 남
-int dx[] = { 0, -1, 0, 1 };
-int dy[] = { 1, 0, -1, 0 };
+int Board[MAX][MAX];
+int Time;
+
+int dx[] = { 0, 0, -1, 1 };
+int dy[] = { 1, -1, 0, 0 };
 
 struct Current_Direction
 {
@@ -19,7 +20,7 @@ Current_Direction current[MAX];
 
 queue<pair<int, char>> Info;
 
-[[noreturn]] int solution(int N, int K, int L)
+int solution(int N, int K, int L)
 {
     queue<pair<pair<int, int>, int>> Snake;
 
@@ -31,83 +32,75 @@ queue<pair<int, char>> Info;
     current->CurX = 0;
     current->CurY = 0;
 
-    pair<int, char> Snake_Info = Info.front();
-    Info.pop();
-
     for(;;)
     {
-        if (Time == Snake_Info.first)
+        if (Time == Info.front().first)
         {
-            if (Snake_Info.second == 'L')
+            if (Info.front().second == 'L')
             {
-                if (current->curX == 0 && current->curY == 0)
+                if (current->CurX == 0 && current->CurY == 0)
                 {
-                    current->curX = 2;
-                    current->curY = 2;
+                    current->CurX = 2;
+                    current->CurY = 2;
                 }
-                else if (current->curX == 1 && current->curY == 1)
+                else if (current->CurX == 1 && current->CurY == 1)
                 {
-                    current->curX = 3;
-                    current->curY = 3;
+                    current->CurX = 3;
+                    current->CurY = 3;
                 }
-                else if (current->curX == 2 && current->curY == 2)
+                else if (current->CurX == 2 && current->CurY == 2)
                 {
-                    current->curX = 1;
-                    current->curY = 1;
+                    current->CurX = 1;
+                    current->CurY = 1;
                 }
-                else if (current->curX == 3 && current->curY == 3)
+                else if (current->CurX == 3 && current->CurY == 3)
                 {
-                    current->curX = 0;
-                    current->curY = 0;
+                    current->CurX = 0;
+                    current->CurY = 0;
                 }
             }
-            else if (Snake_Info.second == 'D')
+            else if (Info.front().second == 'D')
             {
-                if (current->curX == 0 && current->curY == 0)
+                if (current->CurX == 0 && current->CurY == 0)
                 {
-                    current->curX = 3;
-                    current->curY = 3;
+                    current->CurX = 3;
+                    current->CurY = 3;
                 }
-                else if (current->curX == 1 && current->curY == 1)
+                else if (current->CurX == 1 && current->CurY == 1)
                 {
-                    current->curX = 2;
-                    current->curY = 2;
+                    current->CurX = 2;
+                    current->CurY = 2;
                 }
-                else if (current->curX == 2 && current->curY == 2)
+                else if (current->CurX == 2 && current->CurY == 2)
                 {
-                    current->curX = 0;
-                    current->curY = 0;
+                    current->CurX = 0;
+                    current->CurY = 0;
                 }
-                else if (current->curX == 3 && current->curY == 3)
+                else if (current->CurX == 3 && current->CurY == 3)
                 {
-                    current->curX = 1;
-                    current->curY = 1;
+                    current->CurX = 1;
+                    current->CurY = 1;
                 }
             }
-            if (!Info.empty())
-            {
-                Snake_Info = Info.front();
-                Info.pop();
-            }
+            Info.pop();
         }
-    }
-    Time++;
+        Time++;
 
-    int nx = Snake.front().first.first + dx[current->CurX];
-    int ny = Snake.front().first.second + dy[current->CurY];
+        int nx = Snake.back().first.first + dx[current->CurX];
+        int ny = Snake.back().first.second + dy[current->CurY];
 
-    if (Board[nx][ny] == true)
-        return Time;
-    if (nx < 0 || nx >= N || ny < 0 || ny >= N)
-        return Time;
-    if (Board[nx][ny] != 100)
-    {
-        pair<int, int> Tail = Snake.front().first;
-        Board[Tail.first][Tail.second] = false;
-        Snake.pop();
+        if (Board[nx][ny] == true)
+            return Time;
+        if (nx < 0 || nx >= N || ny < 0 || ny >= N)
+            return Time;
+        if (Board[nx][ny] != 100)
+        {
+            Board[Snake.front().first.first][Snake.front().first.second] = false;
+            Snake.pop();
+        }
+        Board[nx][ny] = true;
+        Snake.push({ { nx, ny }, Snake.front().second++ } );
     }
-    Board[nx][ny] = true;
-    Snake.push({ { nx, ny }, Snake.front().second++ } );
 }
 
 int main()
@@ -117,17 +110,14 @@ int main()
     int Apple_col;
     int Apple_row;
     int L;
-    int X[T_MAX];
+    int X;
     char C;
-
-    int Board[MAX][MAX];
-    int Time;
 
     cin >> N;
     cin >> K;
 
     for (int i = 0; i < K; i++) {
-        cin >> Apple_col >> Apple_row;
+        cin >> Apple_row >> Apple_col;
         Board[Apple_row - 1][Apple_col - 1] = 100;
     }
 
@@ -135,7 +125,7 @@ int main()
 
     for (int i = 0; i < L; i++) {
         cin >> X >> C;
-        Info.push({X, C});
+        Info.push({ X, C });
     }
 
     cout << solution(N, K, L);
